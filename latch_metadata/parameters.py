@@ -1,348 +1,455 @@
-
-from dataclasses import dataclass
 import typing
+from dataclasses import dataclass
+
 import typing_extensions
-
 from flytekit.core.annotation import FlyteAnnotation
-
-from latch.types.metadata import NextflowParameter
-from latch.types.file import LatchFile
 from latch.types.directory import LatchDir, LatchOutputDir
+from latch.types.file import LatchFile
+from latch.types.metadata import (
+    Fork,
+    ForkBranch,
+    LatchAuthor,
+    NextflowMetadata,
+    NextflowParameter,
+    NextflowRuntimeResources,
+    Params,
+    Section,
+    Spoiler,
+    Text,
+)
 
-# Import these into your `__init__.py` file:
-#
-# from .parameters import generated_parameters
+flow = [
+    Section(
+        "Input/Output Options",
+        Params(
+            "input",
+            "outdir",
+            "email",
+            "multiqc_title",
+            "build_references",
+            "cosmic_username",
+            "cosmic_passwd",
+            "genomes_base",
+            "ensembl_version",
+            "starfusion_build",
+            "read_length",
+        ),
+    ),
+    Section(
+        "Analysis Options",
+        Params(
+            "all",
+            "arriba",
+            "fusioncatcher",
+            "fusioninspector_only",
+            "fusionreport",
+            "qiagen",
+            "starfusion",
+            "starindex",
+            "stringtie",
+            "tools_cutoff",
+        ),
+    ),
+    Section(
+        "Reference Files",
+        Params(
+            "arriba_ref",
+            "arriba_ref_blacklist",
+            "arriba_ref_cytobands",
+            "arriba_ref_known_fusions",
+            "arriba_ref_protein_domains",
+            "ensembl_ref",
+            "fusioncatcher_ref",
+            "fusionreport_ref",
+            "hgnc_ref",
+            "hgnc_date",
+            "starfusion_ref",
+            "starindex_ref",
+        ),
+    ),
+    Section(
+        "Output Files",
+        Params(
+            "arriba_fusions",
+            "fusioncatcher_fusions",
+            "fusioninspector_fusions",
+            "starfusion_fusions",
+            "whitelist",
+        ),
+    ),
+    Section(
+        "Tool-specific Options",
+        Params(
+            "fusioncatcher_limitSjdbInsertNsj",
+            "fusioninspector_limitSjdbInsertNsj",
+        ),
+    ),
+    Section(
+        "Read Trimming Options",
+        Params(
+            "fastp_trim",
+            "trim_tail",
+            "adapter_fasta",
+        ),
+    ),
+    Section(
+        "Alignment Options",
+        Params(
+            "cram",
+        ),
+    ),
+    Section(
+        "Reference Genome Options",
+        Params(
+            "genome",
+            "fasta",
+            "fai",
+            "gtf",
+            "chrgtf",
+            "transcript",
+            "refflat",
+            "rrna_intervals",
+        ),
+    ),
+    Section(
+        "QC and Visualization",
+        Params(
+            "skip_qc",
+            "skip_vis",
+            "multiqc_methods_description",
+        ),
+    ),
+]
 
 generated_parameters = {
-    'skip_qc': NextflowParameter(
-        type=typing.Optional[bool],
-        default=None,
-        section_title='Skip steps',
-        description='Skip QC steps',
-    ),
-    'skip_vis': NextflowParameter(
-        type=typing.Optional[bool],
-        default=None,
-        section_title=None,
-        description='Skip visualisation steps',
-    ),
-    'input': NextflowParameter(
+    "input": NextflowParameter(
         type=typing.Optional[LatchFile],
+        display_name="Input CSV",
         default=None,
-        section_title='Input/output options',
-        description='Path to comma-separated file containing information about the samples in the experiment.',
+        description="Path to comma-separated file containing information about the samples in the experiment.",
     ),
-    'outdir': NextflowParameter(
-        type=typing_extensions.Annotated[LatchDir, FlyteAnnotation({'output': True})],
+    "outdir": NextflowParameter(
+        type=LatchOutputDir,
+        display_name="Output Directory",
         default=None,
-        section_title=None,
-        description='The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.',
+        description="The output directory where the results will be saved.",
     ),
-    'email': NextflowParameter(
+    "email": NextflowParameter(
         type=typing.Optional[str],
+        display_name="Email",
         default=None,
-        section_title=None,
-        description='Email address for completion summary.',
+        description="Email address for completion summary.",
     ),
-    'multiqc_title': NextflowParameter(
+    "multiqc_title": NextflowParameter(
         type=typing.Optional[str],
+        display_name="MultiQC Report Title",
         default=None,
-        section_title=None,
-        description='MultiQC report title. Printed as page header, used for filename if not otherwise specified.',
+        description="MultiQC report title. Printed as page header, used for filename if not otherwise specified.",
     ),
-    'build_references': NextflowParameter(
-        type=typing.Optional[bool],
+    "build_references": NextflowParameter(
+        type=bool,
+        display_name="Build References",
         default=None,
-        section_title=None,
-        description='Specifies which analysis type for the pipeline - either build references or analyse data',
+        description="Specifies which analysis type for the pipeline - either build references or analyse data",
     ),
-    'cosmic_username': NextflowParameter(
+    "cosmic_username": NextflowParameter(
         type=typing.Optional[str],
+        display_name="COSMIC Username",
         default=None,
-        section_title=None,
-        description='COSMIC username',
+        description="COSMIC username",
     ),
-    'cosmic_passwd': NextflowParameter(
+    "cosmic_passwd": NextflowParameter(
         type=typing.Optional[str],
+        display_name="COSMIC Password",
         default=None,
-        section_title=None,
-        description='COSMIC password',
+        description="COSMIC password",
     ),
-    'genomes_base': NextflowParameter(
+    "genomes_base": NextflowParameter(
         type=str,
+        display_name="Genomes Base Path",
         default=None,
-        section_title=None,
-        description='Path to reference folder',
+        description="Path to reference folder",
     ),
-    'ensembl_version': NextflowParameter(
+    "ensembl_version": NextflowParameter(
         type=typing.Optional[int],
+        display_name="Ensembl Version",
         default=102,
-        section_title=None,
-        description='ensembl version',
+        description="ensembl version",
     ),
-    'starfusion_build': NextflowParameter(
-        type=typing.Optional[bool],
+    "starfusion_build": NextflowParameter(
+        type=bool,
+        display_name="Build STAR-Fusion References",
         default=None,
-        section_title=None,
-        description='If set, starfusion references are built from scratch instead of downloaded (default)',
+        description="If set, starfusion references are built from scratch instead of downloaded (default)",
     ),
-    'read_length': NextflowParameter(
+    "read_length": NextflowParameter(
         type=typing.Optional[int],
+        display_name="Read Length",
         default=100,
-        section_title=None,
-        description='Read length',
+        description="Read length",
     ),
-    'all': NextflowParameter(
-        type=typing.Optional[bool],
+    "all": NextflowParameter(
+        type=bool,
+        display_name="Run All Analyses",
         default=None,
-        section_title=None,
-        description='Build or run all references/analyses',
+        description="Build or run all references/analyses",
     ),
-    'arriba': NextflowParameter(
-        type=typing.Optional[bool],
+    "arriba": NextflowParameter(
+        type=bool,
+        display_name="Run Arriba",
         default=None,
-        section_title=None,
-        description='Build or run arriba references/analyses',
+        description="Build or run arriba references/analyses",
     ),
-    'arriba_ref': NextflowParameter(
+    "arriba_ref": NextflowParameter(
         type=typing.Optional[str],
+        display_name="Arriba References",
         default=None,
-        section_title=None,
-        description='Path to arriba references',
+        description="Path to arriba references",
     ),
-    'arriba_ref_blacklist': NextflowParameter(
+    "arriba_ref_blacklist": NextflowParameter(
         type=typing.Optional[str],
+        display_name="Arriba Blacklist",
         default=None,
-        section_title=None,
-        description='Path to arriba reference blacklist',
+        description="Path to arriba reference blacklist",
     ),
-    'arriba_ref_cytobands': NextflowParameter(
+    "arriba_ref_cytobands": NextflowParameter(
         type=typing.Optional[str],
+        display_name="Arriba Cytobands",
         default=None,
-        section_title=None,
-        description='Path to arriba reference cytobands',
+        description="Path to arriba reference cytobands",
     ),
-    'arriba_ref_known_fusions': NextflowParameter(
+    "arriba_ref_known_fusions": NextflowParameter(
         type=typing.Optional[str],
+        display_name="Arriba Known Fusions",
         default=None,
-        section_title=None,
-        description='Path to arriba reference known fusions',
+        description="Path to arriba reference known fusions",
     ),
-    'arriba_ref_protein_domains': NextflowParameter(
+    "arriba_ref_protein_domains": NextflowParameter(
         type=typing.Optional[str],
+        display_name="Arriba Protein Domains",
         default=None,
-        section_title=None,
-        description='Path to arriba reference protein domain',
+        description="Path to arriba reference protein domain",
     ),
-    'arriba_fusions': NextflowParameter(
+    "arriba_fusions": NextflowParameter(
         type=typing.Optional[str],
+        display_name="Arriba Fusions Output",
         default=None,
-        section_title=None,
-        description='Path to arriba output',
+        description="Path to arriba output",
     ),
-    'ensembl_ref': NextflowParameter(
+    "ensembl_ref": NextflowParameter(
         type=typing.Optional[str],
+        display_name="Ensembl References",
         default=None,
-        section_title=None,
-        description='Path to ensembl references',
+        description="Path to ensembl references",
     ),
-    'fusioncatcher': NextflowParameter(
-        type=typing.Optional[bool],
+    "fusioncatcher": NextflowParameter(
+        type=bool,
+        display_name="Run FusionCatcher",
         default=None,
-        section_title=None,
-        description='Build or run fusioncatcher references/analyses',
+        description="Build or run fusioncatcher references/analyses",
     ),
-    'fusioncatcher_fusions': NextflowParameter(
+    "fusioncatcher_fusions": NextflowParameter(
         type=typing.Optional[str],
+        display_name="FusionCatcher Fusions Output",
         default=None,
-        section_title=None,
-        description='Path to fusioncatcher output',
+        description="Path to fusioncatcher output",
     ),
-    'fusioncatcher_limitSjdbInsertNsj': NextflowParameter(
+    "fusioncatcher_limitSjdbInsertNsj": NextflowParameter(
         type=typing.Optional[int],
+        display_name="FusionCatcher limitSjdbInsertNsj",
         default=None,
-        section_title=None,
-        description='Use limitSjdbInsertNsj with int for fusioncatcher',
+        description="Use limitSjdbInsertNsj with int for fusioncatcher",
     ),
-    'fusioncatcher_ref': NextflowParameter(
+    "fusioncatcher_ref": NextflowParameter(
         type=typing.Optional[str],
+        display_name="FusionCatcher References",
         default=None,
-        section_title=None,
-        description='Path to fusioncatcher references',
+        description="Path to fusioncatcher references",
     ),
-    'fusioninspector_limitSjdbInsertNsj': NextflowParameter(
+    "fusioninspector_limitSjdbInsertNsj": NextflowParameter(
         type=typing.Optional[int],
+        display_name="FusionInspector limitSjdbInsertNsj",
         default=None,
-        section_title=None,
-        description='Use limitSjdbInsertNsj with int for fusioninspector STAR process',
+        description="Use limitSjdbInsertNsj with int for fusioninspector STAR process",
     ),
-    'fusioninspector_only': NextflowParameter(
-        type=typing.Optional[bool],
+    "fusioninspector_only": NextflowParameter(
+        type=bool,
+        display_name="Run FusionInspector Only",
         default=None,
-        section_title=None,
-        description='Skip fusion-report. --fusioninspector_fusions PATH needed to provide a fusion list as input',
+        description="Skip fusion-report. --fusioninspector_fusions PATH needed to provide a fusion list as input",
     ),
-    'fusioninspector_fusions': NextflowParameter(
+    "fusioninspector_fusions": NextflowParameter(
         type=typing.Optional[str],
+        display_name="FusionInspector Fusions Input",
         default=None,
-        section_title=None,
-        description='Path to a fusion list file built with format GENE1--GENE2',
+        description="Path to a fusion list file built with format GENE1--GENE2",
     ),
-    'fusionreport': NextflowParameter(
-        type=typing.Optional[bool],
+    "fusionreport": NextflowParameter(
+        type=bool,
+        display_name="Build Fusion Report",
         default=None,
-        section_title=None,
-        description='Build fusionreport references',
+        description="Build fusionreport references",
     ),
-    'fusionreport_ref': NextflowParameter(
+    "fusionreport_ref": NextflowParameter(
         type=typing.Optional[str],
+        display_name="Fusion Report References",
         default=None,
-        section_title=None,
-        description='Path to fusionreport references',
+        description="Path to fusionreport references",
     ),
-    'hgnc_ref': NextflowParameter(
+    "hgnc_ref": NextflowParameter(
         type=typing.Optional[str],
+        display_name="HGNC Database",
         default=None,
-        section_title=None,
-        description='Path to HGNC database file',
+        description="Path to HGNC database file",
     ),
-    'hgnc_date': NextflowParameter(
+    "hgnc_date": NextflowParameter(
         type=typing.Optional[str],
+        display_name="HGNC Timestamp",
         default=None,
-        section_title=None,
-        description='Path to HGNC timestamp file for database retrieval',
+        description="Path to HGNC timestamp file for database retrieval",
     ),
-    'qiagen': NextflowParameter(
-        type=typing.Optional[bool],
+    "qiagen": NextflowParameter(
+        type=bool,
+        display_name="Use QIAGEN COSMIC",
         default=None,
-        section_title=None,
-        description='Use QIAGEN instead of SANGER to download COSMIC database',
+        description="Use QIAGEN instead of SANGER to download COSMIC database",
     ),
-    'starfusion': NextflowParameter(
-        type=typing.Optional[bool],
+    "starfusion": NextflowParameter(
+        type=bool,
+        display_name="Run STAR-Fusion",
         default=None,
-        section_title=None,
-        description='Build or run starfusion references/analyses',
+        description="Build or run starfusion references/analyses",
     ),
-    'starfusion_fusions': NextflowParameter(
+    "starfusion_fusions": NextflowParameter(
         type=typing.Optional[str],
+        display_name="STAR-Fusion Output",
         default=None,
-        section_title=None,
-        description='Path to starfusion output',
+        description="Path to starfusion output",
     ),
-    'starfusion_ref': NextflowParameter(
+    "starfusion_ref": NextflowParameter(
         type=typing.Optional[str],
+        display_name="STAR-Fusion References",
         default=None,
-        section_title=None,
-        description='Path to starfusion references',
+        description="Path to starfusion references",
     ),
-    'starindex': NextflowParameter(
-        type=typing.Optional[bool],
+    "starindex": NextflowParameter(
+        type=bool,
+        display_name="Run STAR Index",
         default=None,
-        section_title=None,
-        description='Build or run starindex references/analyses',
+        description="Build or run starindex references/analyses",
     ),
-    'starindex_ref': NextflowParameter(
+    "starindex_ref": NextflowParameter(
         type=typing.Optional[str],
+        display_name="STAR Index References",
         default=None,
-        section_title=None,
-        description='Path to starindex references',
+        description="Path to starindex references",
     ),
-    'stringtie': NextflowParameter(
-        type=typing.Optional[bool],
+    "stringtie": NextflowParameter(
+        type=bool,
+        display_name="Run StringTie",
         default=None,
-        section_title=None,
-        description='Run stringtie analysis',
+        description="Run stringtie analysis",
     ),
-    'tools_cutoff': NextflowParameter(
+    "tools_cutoff": NextflowParameter(
         type=typing.Optional[int],
+        display_name="Tools Cutoff",
         default=None,
-        section_title=None,
-        description='Discard fusions identified by less than INT tools',
+        description="Discard fusions identified by less than INT tools",
     ),
-    'whitelist': NextflowParameter(
+    "whitelist": NextflowParameter(
         type=typing.Optional[str],
+        display_name="Fusion Whitelist",
         default=None,
-        section_title=None,
-        description='Path to fusions to add to the input of fusioninspector',
+        description="Path to fusions to add to the input of fusioninspector",
     ),
-    'fastp_trim': NextflowParameter(
-        type=typing.Optional[bool],
+    "fastp_trim": NextflowParameter(
+        type=bool,
+        display_name="Fastp Trimming",
         default=None,
-        section_title='Read trimming options',
-        description='Preform fastp trimming of reads, default: false',
+        description="Perform fastp trimming of reads, default: false",
     ),
-    'trim_tail': NextflowParameter(
+    "trim_tail": NextflowParameter(
         type=typing.Optional[int],
+        display_name="Tail Trimming",
         default=None,
-        section_title=None,
-        description='Preform tail trimming of reads, default: null',
+        description="Perform tail trimming of reads, default: null",
     ),
-    'adapter_fasta': NextflowParameter(
+    "adapter_fasta": NextflowParameter(
         type=typing.Optional[str],
+        display_name="Adapter FASTA",
         default=None,
-        section_title=None,
-        description='Path to adapter fasta file: default: []',
+        description="Path to adapter fasta file: default: []",
     ),
-    'cram': NextflowParameter(
+    "cram": NextflowParameter(
         type=typing.Optional[str],
+        display_name="CRAM Compression",
         default=None,
-        section_title='Alignment compression options',
-        description='List of tools for which to compress BAM file to CRAM,default: [], options: arriba, starfusion. Leave no space between options',
+        description="List of tools for which to compress BAM file to CRAM, default: [], options: arriba, starfusion. Leave no space between options",
     ),
-    'genome': NextflowParameter(
+    "genome": NextflowParameter(
         type=typing.Optional[str],
+        display_name="iGenomes Reference",
         default=None,
-        section_title='Reference genome options',
-        description='Name of iGenomes reference.',
+        description="Name of iGenomes reference.",
     ),
-    'fasta': NextflowParameter(
+    "fasta": NextflowParameter(
         type=typing.Optional[LatchFile],
+        display_name="FASTA Genome File",
         default=None,
-        section_title=None,
-        description='Path to FASTA genome file.',
+        description="Path to FASTA genome file.",
     ),
-    'fai': NextflowParameter(
+    "fai": NextflowParameter(
         type=typing.Optional[LatchFile],
+        display_name="FASTA Index File",
         default=None,
-        section_title=None,
-        description='Path to FASTA genome index file.',
+        description="Path to FASTA genome index file.",
     ),
-    'gtf': NextflowParameter(
+    "gtf": NextflowParameter(
         type=typing.Optional[LatchFile],
+        display_name="GTF File",
         default=None,
-        section_title=None,
-        description='Path to GTF genome file.',
+        description="Path to GTF genome file.",
     ),
-    'chrgtf': NextflowParameter(
+    "chrgtf": NextflowParameter(
         type=typing.Optional[LatchFile],
+        display_name="Chromosome GTF File",
         default=None,
-        section_title=None,
-        description='Path to GTF genome file.',
+        description="Path to chromosome GTF genome file.",
     ),
-    'transcript': NextflowParameter(
+    "transcript": NextflowParameter(
         type=typing.Optional[LatchFile],
+        display_name="Transcript File",
         default=None,
-        section_title=None,
-        description='Path to GTF genome file.',
+        description="Path to transcript file.",
     ),
-    'refflat': NextflowParameter(
+    "refflat": NextflowParameter(
         type=typing.Optional[LatchFile],
+        display_name="RefFlat File",
         default=None,
-        section_title=None,
-        description='Path to GTF genome file.',
+        description="Path to RefFlat file.",
     ),
-    'rrna_intervals': NextflowParameter(
+    "rrna_intervals": NextflowParameter(
         type=typing.Optional[LatchFile],
+        display_name="rRNA Intervals",
         default=None,
-        section_title=None,
-        description='Path to ribosomal interval list.',
+        description="Path to ribosomal interval list.",
     ),
-    'multiqc_methods_description': NextflowParameter(
+    "multiqc_methods_description": NextflowParameter(
         type=typing.Optional[str],
+        display_name="MultiQC Methods Description",
         default=None,
-        section_title='Generic options',
-        description='Custom MultiQC yaml file containing HTML including a methods description.',
+        description="Custom MultiQC yaml file containing HTML including a methods description.",
+    ),
+    "skip_qc": NextflowParameter(
+        type=bool,
+        display_name="Skip QC Steps",
+        default=None,
+        description="Skip QC steps",
+    ),
+    "skip_vis": NextflowParameter(
+        type=bool,
+        display_name="Skip Visualization Steps",
+        default=None,
+        description="Skip visualisation steps",
     ),
 }
-
